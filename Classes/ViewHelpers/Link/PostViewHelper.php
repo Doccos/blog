@@ -12,7 +12,9 @@ namespace T3G\AgencyPack\Blog\ViewHelpers\Link;
 
 use T3G\AgencyPack\Blog\Domain\Model\Post;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Mvc\RequestInterface;
 use TYPO3\CMS\Extbase\Mvc\Web\Routing\UriBuilder;
+use TYPO3\CMS\Fluid\Core\Rendering\RenderingContext;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractTagBasedViewHelper;
 
 class PostViewHelper extends AbstractTagBasedViewHelper
@@ -48,13 +50,23 @@ class PostViewHelper extends AbstractTagBasedViewHelper
      */
     public function render(): string
     {
+        /** @var RenderingContext $renderingContext */
+        $request = $this->renderingContext->getRequest();
+        if (!$request instanceof RequestInterface) {
+            throw new \RuntimeException(
+                'Can be used only in extbase context and needs a request implementing extbase RequestInterface.',
+                1639819692
+            );
+        }
         /** @var Post $post */
         $post = $this->arguments['post'];
         $section = $this->arguments['section'] ?: '';
         $pageUid = (int) $post->getUid();
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
+
         $createAbsoluteUri = (bool)$this->arguments['createAbsoluteUri'];
         $uri = $uriBuilder->reset()
+            ->setRequest($request)
             ->setTargetPageUid($pageUid)
             ->setSection($section)
             ->setCreateAbsoluteUri($createAbsoluteUri)

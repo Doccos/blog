@@ -12,7 +12,9 @@ namespace T3G\AgencyPack\Blog\ViewHelpers\Link;
 
 use T3G\AgencyPack\Blog\Domain\Model\Author;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Mvc\RequestInterface;
 use TYPO3\CMS\Extbase\Mvc\Web\Routing\UriBuilder;
+use TYPO3\CMS\Fluid\Core\Rendering\RenderingContext;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractTagBasedViewHelper;
 
 class AuthorViewHelper extends AbstractTagBasedViewHelper
@@ -89,9 +91,18 @@ class AuthorViewHelper extends AbstractTagBasedViewHelper
      */
     protected function getUriBuilder(int $pageUid, array $additionalParams, bool $rssFormat): UriBuilder
     {
+        /** @var RenderingContext $renderingContext */
+        $request = $this->renderingContext->getRequest();
+        if (!$request instanceof RequestInterface) {
+            throw new \RuntimeException(
+                'Can be used only in extbase context and needs a request implementing extbase RequestInterface.',
+                1639819692
+            );
+        }
         /** @var UriBuilder $uriBuilder */
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
         $uriBuilder->reset()
+            ->setRequest($request)
             ->setTargetPageUid($pageUid)
             ->setArguments($additionalParams);
         if ($rssFormat) {

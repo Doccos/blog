@@ -12,7 +12,9 @@ namespace T3G\AgencyPack\Blog\ViewHelpers\Link;
 
 use T3G\AgencyPack\Blog\Domain\Model\Category;
 use TYPO3\CMS\Core\Utility\GeneralUtility;
+use TYPO3\CMS\Extbase\Mvc\RequestInterface;
 use TYPO3\CMS\Extbase\Mvc\Web\Routing\UriBuilder;
+use TYPO3\CMS\Fluid\Core\Rendering\RenderingContext;
 use TYPO3Fluid\Fluid\Core\ViewHelper\AbstractTagBasedViewHelper;
 
 class CategoryViewHelper extends AbstractTagBasedViewHelper
@@ -45,6 +47,14 @@ class CategoryViewHelper extends AbstractTagBasedViewHelper
      */
     public function render(): string
     {
+        /** @var RenderingContext $renderingContext */
+        $request = $this->renderingContext->getRequest();
+        if (!$request instanceof RequestInterface) {
+            throw new \RuntimeException(
+                'Can be used only in extbase context and needs a request implementing extbase RequestInterface.',
+                1639819692
+            );
+        }
         $rssFormat = (bool)$this->arguments['rss'];
         /** @var Category $category */
         $category = $this->arguments['category'];
@@ -54,6 +64,7 @@ class CategoryViewHelper extends AbstractTagBasedViewHelper
         ];
         $uriBuilder = GeneralUtility::makeInstance(UriBuilder::class);
         $uriBuilder->reset()
+            ->setRequest($request)
             ->setTargetPageUid($pageUid);
         if ($rssFormat) {
             $uriBuilder
